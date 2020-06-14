@@ -34,7 +34,12 @@ namespace NUnitTestProject1
 
         protected virtual ProductInfo GetProductInfo(int productId)
         {
-            IEnumerable<ProductInfo> productInfos = new List<ProductInfo>
+            return GetProductInfoData().Single(x => x.ProductId == productId);
+        }
+
+        protected virtual IEnumerable<ProductInfo> GetProductInfoData()
+        {
+            return new List<ProductInfo>
             {
                 new ProductInfo
                 {
@@ -57,7 +62,6 @@ namespace NUnitTestProject1
                     Price = 150
                 }
             };
-            return productInfos.Single(x => x.ProductId == productId);
         }
     }
 
