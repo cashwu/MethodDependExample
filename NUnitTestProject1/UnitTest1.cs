@@ -1,19 +1,74 @@
 using System.Collections.Generic;
+using NSubstitute;
 using NUnit.Framework;
 
 namespace NUnitTestProject1
 {
     public class Tests
     {
+        public IClass1 FakeClass1 { get; set; }
+
         [SetUp]
         public void Setup()
         {
+            IClass1 fakeClass1 = Substitute.For<Class1>();
+            fakeClass1.ProcessOrderDetail(
+                Arg.Any<string>(),
+                Arg.Is<PaymentDetail>(x => x.ProdId == 1 && x.Count == 2)).Returns(new OrderDetail
+            {
+                Amount = 246,
+                ProductId = 1
+            });
+            fakeClass1.ProcessOrderDetail(
+                Arg.Any<string>(),
+                Arg.Is<PaymentDetail>(x => x.ProdId == 2 && x.Count == 3)).Returns(new OrderDetail
+            {
+                Amount = 1902,
+                ProductId = 2
+            });
+            fakeClass1.ProcessOrderDetail(
+                Arg.Any<string>(),
+                Arg.Is<PaymentDetail>(x => x.ProdId == 4 && x.Count == 1)).Returns(new OrderDetail
+            {
+                Amount = 150,
+                ProductId = 4
+            });
+            fakeClass1.ProcessOrderDetail(
+                Arg.Any<string>(),
+                Arg.Is<PaymentDetail>(x => x.ProdId == 1 && x.Count == 5)).Returns(new OrderDetail
+            {
+                Amount = 615,
+                ProductId = 1
+            });
+            fakeClass1.ProcessOrderDetail(
+                Arg.Any<string>(),
+                Arg.Is<PaymentDetail>(x => x.ProdId == 2 && x.Count == 4)).Returns(new OrderDetail
+            {
+                Amount = 2536,
+                ProductId = 2
+            });
+            fakeClass1.ProcessOrderDetail(
+                Arg.Any<string>(),
+                Arg.Is<PaymentDetail>(x => x.ProdId == 3 && x.Count == 7)).Returns(new OrderDetail
+            {
+                Amount = 1400,
+                ProductId = 3
+            });
+            fakeClass1.ProcessOrderDetail(
+                Arg.Any<string>(),
+                Arg.Is<PaymentDetail>(x => x.ProdId == 4 && x.Count == 3)).Returns(new OrderDetail
+            {
+                Amount = 450,
+                ProductId = 4
+            });
+            FakeClass1 = fakeClass1;
         }
 
         [Test, TestCaseSource(nameof(TestCase))]
         public void TestProcessOrder(PaymentInfo source, (Order, List<OrderDetail>) expectResult)
         {
-            IClass1 class1 = new Class1();
+            //IClass1 class1 = new Class1();
+            IClass1 class1=new Class1ForTest(FakeClass1);
             var actual = class1.ProcessOrder(source);
             Assert.AreEqual(expectResult.Item1.UserId, actual.order.UserId);
             Assert.AreEqual(expectResult.Item1.OrderAmount, actual.order.OrderAmount);
@@ -129,5 +184,19 @@ namespace NUnitTestProject1
                     })
             }
         };
+    }
+
+    public class Class1ForTest : Class1
+    {
+        public IClass1 FakeClass1 { get; set; }
+        public Class1ForTest(IClass1 fakeClass1)
+        {
+            FakeClass1 = fakeClass1;
+        }
+
+        public override OrderDetail ProcessOrderDetail(string orderId, PaymentDetail paymentDetailInfo)
+        {
+            return FakeClass1.ProcessOrderDetail(orderId, paymentDetailInfo);
+        }
     }
 }
